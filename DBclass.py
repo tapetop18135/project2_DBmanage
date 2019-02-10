@@ -338,7 +338,7 @@ for d in dateList:
     # for x in result:
     #     print(x)
     if(result.count() > 0):
-        print(f"have Data date {dateS}")
+        print(f"have data date _ {i} : {dateS}")
         continue
 
     for temp in arrayData:
