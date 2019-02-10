@@ -307,7 +307,7 @@ import numpy as np
 test = MongoDB_class("mongodb://localhost:27017/", "dimenReduct", "db_GHCN")
 localname = "GHCND_TXx_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc"
 # # D:\Project\webService\netCDF\GHCN Indics\GHCND_CDD_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc
-obj = xr.open_mfdataset(f'D:/Project/webService/netCDF/GHCN Indics/{localname}')
+obj = xr.open_mfdataset(f'../dataNC/GHCN Indics/{localname}')
 print(obj)
 attributes = obj.attrs
 coordinates = obj.coords
