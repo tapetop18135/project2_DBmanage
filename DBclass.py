@@ -400,7 +400,7 @@ for d in dateList:
     # print("data",myDict["data"])
     
     # break
-    # print(f"{i} - {test.insertDB(myDict)}")
+    print(f"{i} - {test.insertDB(myDict)}")
     
     i+=1
 ######################### AVG TREND ########################
