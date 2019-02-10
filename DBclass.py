@@ -1,7 +1,7 @@
 import pymongo
-from classReadNetCDF import BaseDataUse
+# from classReadNetCDF import BaseDataUse
 from datetime import datetime
-from classRegrids import Regrids
+# from classRegrids import Regrids
 # myDict = {
 #     "method_name": "kernelPCA",
 #     "type_map": "tmax", 
@@ -71,8 +71,31 @@ class MongoDB_class:
         pass
 
     def queryDBby_indic(self, dataset, dateS, dateE, index_name):
+       
         dateS = datetime.strptime(dateS, '%Y-%m-%d')
         dateE = datetime.strptime(dateE, '%Y-%m-%d')
+        # print("dataset", dataset)
+        # print("dateS", dateS)
+        # print("dateE", dateE)
+        # print("index_name", index_name)
+        x = self.mycol.find({
+            "$and": [
+                {"dataset_name_short": dataset}, 
+                {"detail.index_name": index_name},
+                {
+                    "detail.date": {"$gte":dateS, "$lte": dateE}
+                    # "detail.date": {$gte : new Date('1951-01-01') , $lte: new Date('1952-01-01')}
+                }, 
+                ] 
+            }
+        )
+
+        return x
+    
+    def queryDBby_indicCheck(self, dataset, dateS, dateE, index_name):
+        # print(dateS)
+        # dateS = datetime.strptime(dateS, '%Y-%m-%d')
+        # dateE = datetime.strptime(dateE, '%Y-%m-%d')
         # print("dataset", dataset)
         # print("dateS", dateS)
         # print("dateE", dateE)
@@ -309,8 +332,17 @@ for d in dateList:
     
     data = obj.sel(time=d)
     # dataU = data["Ann"].sel()
+    # print(datetime.strptime(str(str(d)[:8]),'%Y%m%d'))
+    dateS = datetime.strptime(str(str(d)[:8]),'%Y%m%d')
+    result = test.queryDBby_indicCheck(dataset_name_short, dateS, dateS, index_name)
+    # for x in result:
+    #     print(x)
+    if(result.count() > 0):
+        print(f"have Data date {dateS}")
+        continue
+
     for temp in arrayData:
-        print(f"{i} : {d} - {temp}")
+        print(f"dont have _ {i} : {dateS} - {temp}")
         tempMonth[temp] = []
         for lat in data.coords["lat"].values.tolist():
             for lon in data.coords["lon"].values.tolist():
@@ -368,7 +400,7 @@ for d in dateList:
     # print("data",myDict["data"])
     
     # break
-    print(f"{i} - {test.insertDB(myDict)}")
+    # print(f"{i} - {test.insertDB(myDict)}")
     
     i+=1
 ######################### AVG TREND ########################
