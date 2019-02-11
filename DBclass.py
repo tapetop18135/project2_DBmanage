@@ -318,7 +318,7 @@ type_measure = "temperature"
 method = "Intensity"
 
 
-test = MongoDB_class("mongodb://localhost:27017/", "test", "db_GHCN")
+test = MongoDB_class("mongodb://localhost:27017/", "climateDB", "db_GHCN")
 localname = f"GHCND_{index_name}_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc"
 # # D:\Project\webService\netCDF\GHCN Indics\GHCND_CDD_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc
 # obj = xr.open_mfdataset(f'../webService/netCDF/GHCN Indics/{localname}')
