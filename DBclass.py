@@ -306,14 +306,24 @@ class MongoDB_class:
 #     # print(myDict["Jan"])
 #     test.insertDB(myDict)
     
-#     #################################### NEEEEEEEEEEEEEEEEEEEEE WWWWWWWWWWWWWWWWWWWWWWWW #####################
+    #################################### NEEEEEEEEEEEEEEEEEEEEE WWWWWWWWWWWWWWWWWWWWWWWW #####################
 import numpy as np
-test = MongoDB_class("mongodb://localhost:27017/", "climateDB", "db_GHCN")
-localname = "GHCND_TXx_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc"
-# # D:\Project\webService\netCDF\GHCN Indics\GHCND_CDD_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc
-# obj = xr.open_mfdataset(f'../dataNC/GHCN Indics/{localname}')
 
-objnetCDF = Dataset(f'../dataNC/GHCN Indics/{localname}')
+index_name = "TXx"
+
+dataset_name_short = "GHCN"
+shor_name = "Max Tmax"
+unit = "°C"
+type_measure = "temperature"
+method = "Intensity"
+
+
+test = MongoDB_class("mongodb://localhost:27017/", "test", "db_GHCN")
+localname = f"GHCND_{index_name}_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc"
+# # D:\Project\webService\netCDF\GHCN Indics\GHCND_CDD_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc
+# obj = xr.open_mfdataset(f'../webService/netCDF/GHCN Indics/{localname}')
+
+objnetCDF = Dataset(f'../dataNC/GHCN Indics/{localname}')# (f'../webService/netCDF/GHCN Indics/{localname}') #(f'../dataNC/GHCN Indics/{localname}')
 # print(objnetCDF.variables['lat'][:])
 lat_list = objnetCDF.variables['lat'][:]
 lon_list = objnetCDF.variables['lon'][:]
@@ -329,12 +339,7 @@ dateList = objnetCDF["time"][:]
 
 ntime, nlat, nlon = objnetCDF["Ann"].shape
 
-dataset_name_short = "GHCN"
-index_name = "TXx"
-shor_name = "Max Tmax"
-unit = "°C"
-type_measure = "temperature"
-method = "Intensity"
+
 i = 0
 print(f"Dataset is : {localname}")
 
@@ -384,24 +389,9 @@ for time_i in range(0,ntime):
                 "date": datetime.strptime(str(dateList[time_i])[:8],'%Y%m%d'),
                 "method": method,
 
-                # "lat_list": data.coords["lat"].values.tolist(),
-                # "lon_list": data.coords["lon"].values.tolist()
 
             },
         "data" : tempMonth
-            # "Ann": data["Ann"].values.tolist(),
-            # "Jan": data["Jan"].values.tolist(),
-            # "Feb": data["Feb"].values.tolist(),
-            # "Mar": data["Mar"].values.tolist(),
-            # "Apr": data["Apr"].values.tolist(),
-            # "May": data["May"].values.tolist(),
-            # "Jun": data["Jun"].values.tolist(),
-            # "Jul": data["Jul"].values.tolist(),
-            # "Aug": data["Aug"].values.tolist(),
-            # "Sep": data["Sep"].values.tolist(),
-            # "Oct": data["Oct"].values.tolist(),
-            # "Nov": data["Nov"].values.tolist(),
-            # "Dec": data["Dec"].values.tolist(),
         } 
     # print(myDict["GHCN"][datetime.strptime(str(d)[:8],'%Y%m%d')]["data"])
 
@@ -412,130 +402,131 @@ for time_i in range(0,ntime):
     print(f"{i} - {test.insertDB(myDict)}")
     
     i+=1
-######################### AVG TREND ########################
-# print("############### AVG ######################")
-# test = MongoDB_class("mongodb://localhost:27017/", "dimenReduct", "AVG_mapData")
+####################### AVG TREND ########################
+print("############### AVG ######################")
+test = MongoDB_class("mongodb://localhost:27017/", "climateDB", "db_avg_Map")
 
-# from netCDF4 import Dataset
-# import numpy as np
-# loname = "GHCND_TN10p_1951-2018_RegularGrid_global_AVG.nc"
-# localname = f"D:/Project/webService/netCDF/AVG_TREND_map/ghcndex_indexAVG/{loname}"
+from netCDF4 import Dataset
+import numpy as np
+
+# index_name = "TN10p"
+loname = f"GHCND_{index_name}_1951-2018_RegularGrid_global_AVG.nc"
+localname = f"../dataNC/AVG_TREND_map/ghcndex_indexAVG/{loname}"
 
 
 # dataset_name_short = "GHCN"
-# index_name = "TN10p"
 # shor_name = "Cool nights (Share of days when Tmin < 10th percentile)"
 # unit = "percen of days"#"°C"
 # type_measure = "temperature"
 # method = "Frequency"
 # author = "Nuttakit_Puntakarn"
-# i = 0
+i = 0
 
-# ncin = Dataset(localname, 'r')
+ncin = Dataset(localname, 'r')
 
-# nday, nlat, nlon = ncin.variables["temp"][:].shape
-# temp = ncin.variables["temp"]
+nday, nlat, nlon = ncin.variables["temp"][:].shape
+temp = ncin.variables["temp"]
 
-# arrayData = ["Ann","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+arrayData = ["Ann","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 # print(ncin.variables)
-# lat_list = ncin.variables["latitudes"][:]
-# lon_list = ncin.variables["longitudes"][:]
-# tempData = {}
-# for day in range(0,nday):
-#     tempData[arrayData[day]] = []
-#     for lat_i in range(0, nlat):
-#         for lon_i in range(0, nlon):
-#             # print(lon_i)
-#             tempD = {}
-#             # print(lat_list[lat_i], lon_list[lon_i], temp[day][lat_i][lon_i])
-#             if(np.isnan(temp[day][lat_i][lon_i])):
-#                 pass
-#             else:
-#                 tempData[arrayData[day]].append({"lat": float(lat_list[lat_i]), "lon": float(lon_list[lon_i]), "value": float(temp[day][lat_i][lon_i])})
+lat_list = ncin.variables["latitudes"][:]
+lon_list = ncin.variables["longitudes"][:]
+tempData = {}
+for day in range(0,nday):
+    tempData[arrayData[day]] = []
+    for lat_i in range(0, nlat):
+        for lon_i in range(0, nlon):
+            # print(lon_i)
+            tempD = {}
+            # print(lat_list[lat_i], lon_list[lon_i], temp[day][lat_i][lon_i])
+            if(np.isnan(temp[day][lat_i][lon_i])):
+                pass
+            else:
+                tempData[arrayData[day]].append({"lat": float(lat_list[lat_i]), "lon": float(lon_list[lon_i]), "value": float(temp[day][lat_i][lon_i])})
         
-#     print(len(tempData[arrayData[day]]))
-#     print(arrayData[day],"----------------------------------------------------")
-# # print(tempData)
+    print(len(tempData[arrayData[day]]))
+    print(arrayData[day],"----------------------------------------------------")
+# print(tempData)
 
-# myDict = {
-#         "dataset_name_short" : dataset_name_short,
-#             "detail" : {
-#                 "arrayMonth" : arrayData,
-#                 "dataset_name" : loname,
-#                 "index_name": index_name,
-#                 "shor_name": shor_name,
-#                 "type_measure": type_measure,
-#                 "unit": unit,
-#                 "author" : author,
-#                 "date": "1971-01-01_2010-01-01",
-#                 "method": method,
-#                 "shape": (nlat, nlon),
+myDict = {
+        "dataset_name_short" : dataset_name_short,
+            "detail" : {
+                "arrayMonth" : arrayData,
+                "dataset_name" : loname,
+                "index_name": index_name,
+                "shor_name": shor_name,
+                "type_measure": type_measure,
+                "unit": unit,
+                # "author" : author,
+                "date": "1971-01-01_2010-01-01",
+                "method": method,
+                # "shape": (nlat, nlon),
 
-#             },
-#         "data" : tempData
-#         } 
+            },
+        "data" : tempData
+        } 
 
-# test.insertDB(myDict)
+test.insertDB(myDict)
 
-# print("############### TREND ######################")
+print("############### TREND ######################")
 
-# test = MongoDB_class("mongodb://localhost:27017/", "dimenReduct", "Trend_mapData")
+test = MongoDB_class("mongodb://localhost:27017/", "climateDB", "db_trend_Map")
 
-# from netCDF4 import Dataset
-# import numpy as np
-# loname = "GHCND_TN10p_1951-2018_RegularGrid_global_Trend_1971-2010.nc"
-# localname = f"D:/Project/webService/netCDF/AVG_TREND_map/ghcndex_indexTREND/{loname}"
-# # # dataset_name_short = "GHCN"
-# # # index_name = "TX10p"
-# # # shor_name = "Min Tmin (Coldest daily minimum temperature)"
-# # # unit = "percen of days"# "°C"#
-# # type_measure = "temperature"
-# # method = "Frequency"# "Intensity"#
-# # author = "Nuttakit_Puntakarn"
-# i = 0
+from netCDF4 import Dataset
+import numpy as np
+loname = f"GHCND_{index_name}_1951-2018_RegularGrid_global_Trend_1971-2010.nc"
+localname = f"../dataNC/AVG_TREND_map/ghcndex_indexTREND/{loname}"
+# # dataset_name_short = "GHCN"
+# # index_name = "TX10p"
+# # shor_name = "Min Tmin (Coldest daily minimum temperature)"
+# # unit = "percen of days"# "°C"#
+# type_measure = "temperature"
+# method = "Frequency"# "Intensity"#
+# author = "Nuttakit_Puntakarn"
+i = 0
 
-# ncin = Dataset(localname, 'r')
+ncin = Dataset(localname, 'r')
 
-# nday, nlat, nlon = ncin.variables["temp"][:].shape
-# temp = ncin.variables["temp"]
+nday, nlat, nlon = ncin.variables["temp"][:].shape
+temp = ncin.variables["temp"]
 
-# arrayData = ["Ann","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+arrayData = ["Ann","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 # print(ncin.variables)
-# lat_list = ncin.variables["latitudes"][:]
-# lon_list = ncin.variables["longitudes"][:]
-# tempData = {}
-# for day in range(0,nday):
-#     tempData[arrayData[day]] = []
-#     for lat_i in range(0, nlat):
-#         for lon_i in range(0, nlon):
-#             # print(lon_i)
-#             tempD = {}
-#             # print(lat_list[lat_i], lon_list[lon_i], temp[day][lat_i][lon_i])
-#             if(np.isnan(temp[day][lat_i][lon_i])):
-#                 pass
-#             else:
-#                 tempData[arrayData[day]].append({"lat": float(lat_list[lat_i]), "lon": float(lon_list[lon_i]), "value": float(temp[day][lat_i][lon_i])})
+lat_list = ncin.variables["latitudes"][:]
+lon_list = ncin.variables["longitudes"][:]
+tempData = {}
+for day in range(0,nday):
+    tempData[arrayData[day]] = []
+    for lat_i in range(0, nlat):
+        for lon_i in range(0, nlon):
+            # print(lon_i)
+            tempD = {}
+            # print(lat_list[lat_i], lon_list[lon_i], temp[day][lat_i][lon_i])
+            if(np.isnan(temp[day][lat_i][lon_i])):
+                pass
+            else:
+                tempData[arrayData[day]].append({"lat": float(lat_list[lat_i]), "lon": float(lon_list[lon_i]), "value": float(temp[day][lat_i][lon_i])})
         
-#     print(len(tempData[arrayData[day]]))
-#     print(arrayData[day],"----------------------------------------------------")
-# # print(tempData)
+    print(len(tempData[arrayData[day]]))
+    print(arrayData[day],"----------------------------------------------------")
+# print(tempData)
 
-# myDict = {
-#         "dataset_name_short" : dataset_name_short,
-#             "detail" : {
-#                 "arrayMonth" : arrayData,
-#                 "dataset_name" : loname,
-#                 "index_name": index_name,
-#                 "shor_name": shor_name,
-#                 "type_measure": type_measure,
-#                 "unit": unit,
-#                 "author" : author,
-#                 "date": "1971-01-01_2010-01-01",
-#                 "method": method,
-#                 "shape": (nlat, nlon),
+myDict = {
+        "dataset_name_short" : dataset_name_short,
+            "detail" : {
+                "arrayMonth" : arrayData,
+                "dataset_name" : loname,
+                "index_name": index_name,
+                "shor_name": shor_name,
+                "type_measure": type_measure,
+                "unit": unit,
+                # "author" : author,
+                "date": "1971-01-01_2010-01-01",
+                "method": method,
+                # "shape": (nlat, nlon),
 
-#             },
-#         "data" : tempData
-#         } 
+            },
+        "data" : tempData
+        } 
 
-# test.insertDB(myDict)
+test.insertDB(myDict)
