@@ -1,6 +1,7 @@
 import pymongo
 # from classReadNetCDF import BaseDataUse
 from datetime import datetime
+
 # from classRegrids import Regrids
 # myDict = {
 #     "method_name": "kernelPCA",
@@ -9,10 +10,13 @@ from datetime import datetime
 #     "valueX_time": [1, 2, 3, 4, 5, 3, 7, 8, 9, 1324, 7, 98, 13, 4, 89, 120],
 #     "valueY_temp": [1, 3, 79, 10, 2, 4, 78, 32, 1, 7, 7, 9, 63, 9, 7, 78]
 # }
-
+from netCDF4 import Dataset
+from netCDF4 import num2date
 
 import xarray as xr
 
+import time
+import sys
 
 class MongoDB_class:
     def __init__(self, name, db_name, collection_name):
@@ -304,16 +308,26 @@ class MongoDB_class:
     
 #     #################################### NEEEEEEEEEEEEEEEEEEEEE WWWWWWWWWWWWWWWWWWWWWWWW #####################
 import numpy as np
-test = MongoDB_class("mongodb://localhost:27017/", "climateDB", "db_GHCN")
+test = MongoDB_class("mongodb://localhost:27017/", "climate_DB", "db_GHCN")
 localname = "GHCND_TXx_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc"
 # # D:\Project\webService\netCDF\GHCN Indics\GHCND_CDD_1951-2018_RegularGrid_global_2.5x2.5deg_LSmask.nc
-obj = xr.open_mfdataset(f'../dataNC/GHCN Indics/{localname}')
-print(obj)
-attributes = obj.attrs
-coordinates = obj.coords
-# data = obj.data
+# obj = xr.open_mfdataset(f'../dataNC/GHCN Indics/{localname}')
 
-dateList = coordinates["time"].values
+objnetCDF = Dataset(f'../dataNC/GHCN Indics/{localname}')
+# print(objnetCDF.variables['lat'][:])
+lat_list = objnetCDF.variables['lat'][:]
+lon_list = objnetCDF.variables['lon'][:]
+print(lon_list)
+# attributes = obj.attrs
+# coordinates = obj.coords
+# data = obj.data
+# print(objnetCDF["time"][:].shape)
+# print(objnetCDF["time"].units)
+# print(objnetCDF["time"].calendar)
+# print(num2date(objnetCDF["time"][:], units=objnetCDF["time"].units, calendar=objnetCDF["time"].calendar))
+dateList = objnetCDF["time"][:]
+
+ntime, nlat, nlon = objnetCDF["Ann"].shape
 
 dataset_name_short = "GHCN"
 index_name = "TXx"
@@ -323,58 +337,52 @@ type_measure = "temperature"
 method = "Intensity"
 i = 0
 print(f"Dataset is : {localname}")
-for d in dateList:
+
+for time_i in range(0,ntime):
     # print(datetime.strptime(str(d)[:8],'%Y%m%d'))
     tempData = {}
     arrayData = ["Ann","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
     tempMonth = {}
     
     
-    data = obj.sel(time=d)
+    # data = obj.sel(time=d)
     # dataU = data["Ann"].sel()
     # print(datetime.strptime(str(str(d)[:8]),'%Y%m%d'))
-    dateS = datetime.strptime(str(str(d)[:8]),'%Y%m%d')
+    dateS = datetime.strptime(str(str(dateList[time_i])[:8]),'%Y%m%d')
     result = test.queryDBby_indicCheck(dataset_name_short, dateS, dateS, index_name)
     # for x in result:
-    #     print(x)
+    # print(result.count())
     if(result.count() > 0):
         print(f"have data date _ {i} : {dateS}")
         i+=1
         continue
 
     for temp in arrayData:
+        data = objnetCDF[temp]
         print(f"dont have _ {i} : {dateS} - {temp}")
         tempMonth[temp] = []
-        for lat in data.coords["lat"].values.tolist():
-            for lon in data.coords["lon"].values.tolist():
-                
-                # tempData["coor_val"] = {"lat": lat, "lon": lon, "value": data.sel(lat=lat,lon=lon)[temp].values.tolist()}
-                # tempMonth[temp].append(tempData["coor_val"])
-                # # print(len(tempMonth["Ann"]))
+        for lat_i in range(0, nlat):
+            for lon_i in range(0, nlon):
+                # print(data[time_i][lat_i][lon_i],np.ma.is_masked(data[time_i][lat_i][lon_i]))
                 # break
-                    # print(data.sel(lat=lat,lon=lon)[temp].values)
-                    # print(np.isnan(data.sel(lat=lat,lon=lon)[temp].values))
-                if(not(np.isnan(data.sel(lat=lat,lon=lon)[temp].values))):
-                    tempData["coor_val"] = {"lat": lat, "lon": lon, "value": data.sel(lat=lat,lon=lon)[temp].values.tolist()}
+                if(not(np.ma.is_masked(data[time_i][lat_i][lon_i]))):
+                    tempData["coor_val"] = {"lat": lat_list[lat_i], "lon": lon_list[lon_i], "value": float(data[time_i][lat_i][lon_i])}
                     tempMonth[temp].append(tempData["coor_val"])
-                    # break
-            # break
+                    # print(i,tempData)
         # print(temp,tempMonth[temp])
         # if(temp == "Jan"):
-        #     break
     myDict = {
         "dataset_name_short" : dataset_name_short,
             "detail" : {
                 "arrayMonth" : arrayData,
                 "dataset_name" : localname,
-                "author" : attributes["author"],
+                # "author" : attributes["author"],
                 "index_name": index_name,
                 "shor_name": shor_name,
                 "type_measure": type_measure,
                 "unit": unit,
-                "date": datetime.strptime(str(d)[:8],'%Y%m%d'),
+                "date": datetime.strptime(str(dateList[time_i])[:8],'%Y%m%d'),
                 "method": method,
-                "shape": data.dims,
 
                 # "lat_list": data.coords["lat"].values.tolist(),
                 # "lon_list": data.coords["lon"].values.tolist()
